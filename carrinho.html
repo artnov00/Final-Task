@@ -93,41 +93,64 @@
             document.getElementById('modal-checkout').style.display = 'flex';
         }
 
-        async function enviarPedido() {
-            const total = carrinho.reduce((acc, i) => acc + i.preco, 0);
+    async function enviarPedido() {
+    // Verifica se tem usuário e carrinho
+    if(!usuarioLogado) {
+        alert("Você precisa fazer login para comprar!");
+        window.location.href = 'login.html';
+        return;
+    }
+    
+    if(carrinho.length === 0) return alert("Carrinho vazio");
+
+    // Calcula o total
+    const total = carrinho.reduce((acc, i) => acc + i.preco, 0);
+    
+    // Monta o objeto para o Java
+    const pedidoDTO = {
+        idCliente: usuarioLogado.idCliente,
+        total: total,
+        itens: carrinho.map(p => ({
+            idProduto: p.idProduto,
+            quantidade: 1,
+            precoUnitario: p.preco
+        }))
+    };
+
+    console.log("Enviando pedido:", pedidoDTO); // Debug para você ver os dados
+
+    try {
+        const res = await fetch(`${API_URL}/pedidos`, {
+            method: 'POST',
+            // --- A CORREÇÃO ESTÁ AQUI EMBAIXO ---
+            headers: {
+                "Content-Type": "application/json",       // Avisa que é JSON (Resolve o erro 415)
+                "ngrok-skip-browser-warning": "true"      // Evita página de erro do Ngrok
+            },
+            body: JSON.stringify(pedidoDTO)
+        });
+
+        if(res.ok) {
+            alert("Pedido Confirmado com Sucesso! Verifique no Banco de Dados.");
             
-            const pedidoDTO = {
-                idCliente: usuarioLogado.idCliente,
-                total: total,
-                itens: carrinho.map(p => ({
-                    idProduto: p.idProduto,
-                    quantidade: 1,
-                    precoUnitario: p.preco
-                }))
-            };
-
-            try {
-                const res = await fetch(`${API_URL}/pedidos`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(pedidoDTO),
-                    headers: new Headers({
-                        "ngrok-skip-browser-warning": "true"
-                    })
-                });
-
-                if(res.ok) {
-                    alert("Pedido Confirmado com Sucesso!");
-                    carrinho = [];
-                    localStorage.setItem('carrinho', JSON.stringify([]));
-                    window.location.href = 'index.html';
-                } else {
-                    alert("Erro ao processar pedido.");
-                }
-            } catch(e) {
-                alert("Erro de conexão.");
-            }
+            // Limpa o carrinho
+            carrinho = [];
+            localStorage.setItem('carrinho', JSON.stringify([]));
+            atualizarContadorHeader(); // Atualiza a bolinha vermelha
+            
+            // Fecha modal e volta pra home
+            document.getElementById('modal-checkout').style.display = 'none';
+            window.location.href = 'index.html';
+        } else {
+            const textoErro = await res.text();
+            console.error("Erro do servidor:", textoErro);
+            alert(`Erro ao processar pedido (Erro ${res.status}). Veja o console.`);
         }
+    } catch(e) {
+        console.error("Erro de conexão:", e);
+        alert("Erro de conexão ao tentar finalizar a compra.");
+    }
+}
 
         renderizarCarrinho();
     </script>
