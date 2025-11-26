@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Nexus Gaming - Login</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Estilos específicos para a caixa de login */
+        .auth-box {
+            max-width: 400px;
+            margin: 50px auto;
+            background: #1e1e1e;
+            padding: 30px;
+            border-radius: 10px;
+            border: 1px solid #333;
+        }
+        .abas-auth { display: flex; margin-bottom: 20px; border-bottom: 1px solid #333; }
+        .aba { flex: 1; padding: 10px; text-align: center; cursor: pointer; color: #777; transition: 0.3s; }
+        .aba:hover { color: #fff; }
+        .aba.ativa { border-bottom: 2px solid #00ff88; color: #00ff88; font-weight: bold; }
+        
+        .form-auth { display: none; }
+        .form-auth.ativa { display: block; animation: fadeIn 0.5s; }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="index.html" class="logo">G4 NEXUS</a>
+        <nav>
+            <a href="index.html">Início</a>
+            <a href="produtos.html">Produtos</a>
+            <a href="suporte.html">Suporte</a>
+        </nav>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <div id="area-usuario"></div>
+            <a href="carrinho.html" style="text-decoration:none; color:white;">
+                🛒 <span id="contador-carrinho" style="background: red; border-radius: 50%; padding: 2px 6px; font-size: 12px;">0</span>
+            </a>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="auth-box">
+            <div class="abas-auth">
+                <div class="aba ativa" onclick="mudarAba('login')" id="tab-login">Entrar</div>
+                <div class="aba" onclick="mudarAba('cadastro')" id="tab-cadastro">Criar Conta</div>
+            </div>
+
+            <!-- FORMULÁRIO DE LOGIN -->
+            <div id="form-login" class="form-auth ativa">
+                <h3 style="text-align: center; margin-bottom: 20px;">Bem-vindo de volta</h3>
+                <input type="email" id="login-email" placeholder="Seu E-mail">
+                <input type="password" id="login-senha" placeholder="Sua Senha">
+                <button onclick="fazerLogin()" class="botao-verde" style="width: 100%; margin-top: 10px;">Acessar Conta</button>
+            </div>
+
+            <!-- FORMULÁRIO DE CADASTRO -->
+            <div id="form-cadastro" class="form-auth">
+                <h3 style="text-align: center; margin-bottom: 20px;">Criar nova conta</h3>
+                <input type="text" id="cad-nome" placeholder="Nome Completo">
+                <input type="email" id="cad-email" placeholder="E-mail">
+                <input type="password" id="cad-senha" placeholder="Criar Senha">
+                <button onclick="fazerCadastro()" class="botao-verde" style="width: 100%; margin-top: 10px;">Cadastrar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="global.js"></script>
+    <script>
+        // Alternar entre abas
+        function mudarAba(tipo) {
+            // Reseta visual das abas
+            document.getElementById('tab-login').classList.remove('ativa');
+            document.getElementById('tab-cadastro').classList.remove('ativa');
+            document.getElementById('form-login').classList.remove('ativa');
+            document.getElementById('form-cadastro').classList.remove('ativa');
+
+            // Ativa a escolhida
+            document.getElementById('tab-' + tipo).classList.add('ativa');
+            document.getElementById('form-' + tipo).classList.add('ativa');
+        }
+
+        // Lógica de Login (Conectado ao Spring Boot)
+        async function fazerLogin() {
+            const email = document.getElementById('login-email').value;
+            const senha = document.getElementById('login-senha').value;
+
+            try {
+                const res = await fetch(`${API_URL}/clientes/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, senha })
+                });
+
+                if (res.ok) {
+                    const usuario = await res.json();
+                    // Salva o usuário no localStorage para persistir a sessão
+                    localStorage.setItem('usuarioLogado', JSON.stringify(usuario));
+                    alert("Login realizado com sucesso!");
+                    window.location.href = 'index.html'; // Redireciona para Home
+                } else {
+                    alert("E-mail ou senha incorretos.");
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Erro ao conectar com o servidor.");
+            }
+        }
+
+        // Lógica de Cadastro
+        async function fazerCadastro() {
+            const nome = document.getElementById('cad-nome').value;
+            const email = document.getElementById('cad-email').value;
+            const senha = document.getElementById('cad-senha').value;
+
+            try {
+                const res = await fetch(`${API_URL}/clientes`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nome, email, senha })
+                });
+
+                if (res.ok) {
+                    alert("Cadastro realizado! Faça login para continuar.");
+                    mudarAba('login');
+                } else {
+                    alert("Erro ao cadastrar. Verifique os dados.");
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Erro ao conectar com o servidor.");
+            }
+        }
+    </script>
+</body>
+</html>

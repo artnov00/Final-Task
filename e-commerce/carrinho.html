@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Nexus Gaming - Carrinho</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <a href="index.html" class="logo">G4 NEXUS</a>
+        <nav>
+            <a href="index.html">Início</a>
+            <a href="produtos.html">Produtos</a>
+            <a href="suporte.html">Suporte</a>
+        </nav>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <div id="area-usuario"></div>
+            <a href="carrinho.html" style="text-decoration:none; color:white;">
+                🛒 <span id="contador-carrinho" style="background: red; border-radius: 50%; padding: 2px 6px; font-size: 12px;">0</span>
+            </a>
+        </div>
+    </header>
+
+    <div class="container">
+        <h2>Meu Carrinho</h2>
+        <div id="lista-itens"></div>
+        <div style="text-align: right; border-top: 1px solid #333; padding-top: 20px; margin-top: 20px;">
+            <h3>Total: R$ <span id="total-valor">0,00</span></h3>
+            <button onclick="abrirModalCheckout()" class="botao-verde">Finalizar Compra</button>
+        </div>
+    </div>
+
+    <!-- Modal de Checkout (Fica escondido) -->
+    <div id="modal-checkout" class="fundo-modal">
+        <div class="caixa-modal">
+            <h3 style="color:#00ff88">Confirmar Pedido</h3>
+            <p>Itens: <span id="modal-resumo"></span></p>
+            <h2>Valor Final: R$ <span id="modal-total">0,00</span></h2>
+            <br>
+            <button onclick="enviarPedido()" class="botao-verde" style="width:100%">PAGAR E CONFIRMAR</button>
+            <br><br>
+            <button onclick="document.getElementById('modal-checkout').style.display='none'" style="background:none; border:none; color:#777; width:100%; cursor:pointer;">Cancelar</button>
+        </div>
+    </div>
+
+    <script src="global.js"></script>
+    <script>
+        function renderizarCarrinho() {
+            const container = document.getElementById('lista-itens');
+            container.innerHTML = '';
+            let total = 0;
+
+            if(carrinho.length === 0) {
+                container.innerHTML = '<p>Seu carrinho está vazio.</p>';
+            } else {
+                carrinho.forEach((item, index) => {
+                    total += item.preco;
+                    container.innerHTML += `
+                        <div style="display:flex; justify-content:space-between; padding:10px; background:#1e1e1e; margin-bottom:10px; align-items:center;">
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <img src="${item.imagemUrl}" style="width:50px; height:50px; object-fit:cover;">
+                                <strong>${item.nome}</strong>
+                            </div>
+                            <div>
+                                <span style="color:#00ff88; margin-right:15px;">R$ ${item.preco.toFixed(2)}</span>
+                                <button onclick="removerItem(${index})" style="color:red; background:none; border:none; cursor:pointer;">Remover</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            document.getElementById('total-valor').innerText = total.toFixed(2);
+        }
+
+        function removerItem(index) {
+            carrinho.splice(index, 1);
+            localStorage.setItem('carrinho', JSON.stringify(carrinho)); // Atualiza armazenamento
+            atualizarContadorHeader();
+            renderizarCarrinho();
+        }
+
+        function abrirModalCheckout() {
+            if(!usuarioLogado) {
+                alert("Você precisa fazer login para comprar!");
+                window.location.href = 'login.html';
+                return;
+            }
+            if(carrinho.length === 0) return alert("Carrinho vazio");
+
+            const total = carrinho.reduce((acc, i) => acc + i.preco, 0);
+            document.getElementById('modal-total').innerText = total.toFixed(2);
+            document.getElementById('modal-resumo').innerText = carrinho.map(i => i.nome).join(', ');
+            document.getElementById('modal-checkout').style.display = 'flex';
+        }
+
+        async function enviarPedido() {
+            const total = carrinho.reduce((acc, i) => acc + i.preco, 0);
+            
+            const pedidoDTO = {
+                idCliente: usuarioLogado.idCliente,
+                total: total,
+                itens: carrinho.map(p => ({
+                    idProduto: p.idProduto,
+                    quantidade: 1,
+                    precoUnitario: p.preco
+                }))
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/pedidos`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(pedidoDTO)
+                });
+
+                if(res.ok) {
+                    alert("Pedido Confirmado com Sucesso!");
+                    carrinho = [];
+                    localStorage.setItem('carrinho', JSON.stringify([]));
+                    window.location.href = 'index.html';
+                } else {
+                    alert("Erro ao processar pedido.");
+                }
+            } catch(e) {
+                alert("Erro de conexão.");
+            }
+        }
+
+        renderizarCarrinho();
+    </script>
+</body>
+</html>
