@@ -84,18 +84,19 @@
 
         // Lógica de Login (Conectado ao Spring Boot)
         async function fazerLogin() {
-            const email = document.getElementById('login-email').value;
-            const senha = document.getElementById('login-senha').value;
-
-            try {
-                const res = await fetch(`${API_URL}/clientes/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, senha }),
-                    headers: new Headers({
-                        "ngrok-skip-browser-warning": "true"
-                    })
-                });
+        const email = document.getElementById('login-email').value;
+        const senha = document.getElementById('login-senha').value;
+    
+        try {
+            const res = await fetch(`${API_URL}/clientes/login`, {
+                method: 'POST',
+                // CORREÇÃO AQUI TAMBÉM:
+                headers: new Headers({
+                    "ngrok-skip-browser-warning": "true",
+                    "Content-Type": "application/json"
+                }),
+                body: JSON.stringify({ email, senha })
+            });
 
                 if (res.ok) {
                     const usuario = await res.json();
@@ -114,32 +115,36 @@
 
         // Lógica de Cadastro
         async function fazerCadastro() {
-            const nome = document.getElementById('cad-nome').value;
-            const email = document.getElementById('cad-email').value;
-            const senha = document.getElementById('cad-senha').value;
-
-            try {
-                const res = await fetch(`${API_URL}/clientes`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nome, email, senha }),
-                    headers: new Headers({
-                        "ngrok-skip-browser-warning": "true"
-                    })
-                });
-
-                if (res.ok) {
-                    alert("Cadastro realizado! Faça login para continuar.");
-                    mudarAba('login');
-                } else {
-                    alert("Erro ao cadastrar. Verifique os dados.");
-                }
-            } catch (error) {
-                console.error(error);
-                alert("Erro ao conectar com o servidor.");
+        const nome = document.getElementById('cad-nome').value;
+        const email = document.getElementById('cad-email').value;
+        const senha = document.getElementById('cad-senha').value;
+    
+        try {
+            const res = await fetch(`${API_URL}/clientes`, {
+                method: 'POST',
+                // AQUI ESTÁ A CORREÇÃO: Adicionamos o Content-Type junto com o do Ngrok
+                headers: new Headers({
+                    "ngrok-skip-browser-warning": "true",
+                    "Content-Type": "application/json" 
+                }),
+                body: JSON.stringify({ nome, email, senha })
+            });
+    
+            if (res.ok) {
+                alert("Cadastro realizado! Faça login para continuar.");
+                mudarAba('login');
+            } else {
+                // É bom mostrar o erro que o servidor devolveu, se houver
+                console.error("Erro no cadastro:", res.status);
+                alert("Erro ao cadastrar. Verifique se o e-mail já existe.");
             }
+        } catch (error) {
+            console.error(error);
+            alert("Erro ao conectar com o servidor.");
         }
+    }
     </script>
 </body>
 
 </html>
+
