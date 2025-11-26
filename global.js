@@ -1,6 +1,6 @@
 // global.js - Conecta API e Gerencia Estado entre Páginas
 
-const API_URL = "https://uncelebrated-armipotent-drake.ngrok-free.dev";
+const API_URL = "https://final-task-backend-34zw.onrender.com/";
 
 // Carrega carrinho salvo ou cria vazio
 let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
@@ -65,3 +65,4 @@ function adicionarAoCarrinho(produto) {
     mostrarAviso("Adicionado ao carrinho!");
 
 }
+
