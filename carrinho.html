@@ -110,7 +110,10 @@
                 const res = await fetch(`${API_URL}/pedidos`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(pedidoDTO)
+                    body: JSON.stringify(pedidoDTO),
+                    headers: new Headers({
+                        "ngrok-skip-browser-warning": "true"
+                    })
                 });
 
                 if(res.ok) {
@@ -129,4 +132,5 @@
         renderizarCarrinho();
     </script>
 </body>
+
 </html>
