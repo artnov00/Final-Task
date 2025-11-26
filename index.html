@@ -41,7 +41,11 @@
         // Lógica específica da Home
         async function carregarDestaques() {
             try {
-                const res = await fetch(`${API_URL}/produtos`);
+                const res = await fetch(`${API_URL}/produtos`, {
+                    headers: new Headers({
+                        "ngrok-skip-browser-warning": "true"
+                    })
+                });
                 const produtos = await res.json();
                 const container = document.getElementById('destaques');
                 container.innerHTML = '';
@@ -64,4 +68,5 @@
         carregarDestaques();
     </script>
 </body>
+
 </html>
