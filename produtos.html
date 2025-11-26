@@ -39,7 +39,11 @@
     <script>
         async function carregarProdutos(filtro) {
             try {
-                const res = await fetch(`${API_URL}/produtos`);
+                const res = await fetch(`${API_URL}/produtos`, {
+                    headers: new Headers({
+                        "ngrok-skip-browser-warning": "true"
+                    })
+                });
                 const produtos = await res.json();
                 const container = document.getElementById('lista-produtos');
                 container.innerHTML = '';
@@ -64,4 +68,5 @@
         carregarProdutos('todos');
     </script>
 </body>
+
 </html>
