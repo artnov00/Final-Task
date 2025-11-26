@@ -2,8 +2,6 @@
 
 const API_URL = "https://uncelebrated-armipotent-drake.ngrok-free.dev";
 
-// --- GERENCIAMENTO DE ESTADO (LOCALSTORAGE) ---
-
 // Carrega carrinho salvo ou cria vazio
 let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
 // Carrega usuário salvo ou nulo
@@ -65,4 +63,5 @@ function adicionarAoCarrinho(produto) {
     localStorage.setItem('carrinho', JSON.stringify(carrinho));
     atualizarContadorHeader();
     mostrarAviso("Adicionado ao carrinho!");
+
 }
