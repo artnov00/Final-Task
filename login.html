@@ -90,7 +90,6 @@
         try {
             const res = await fetch(`${API_URL}/clientes/login`, {
                 method: 'POST',
-                // CORREÇÃO AQUI TAMBÉM:
                 headers: new Headers({
                     "ngrok-skip-browser-warning": "true",
                     "Content-Type": "application/json"
@@ -122,7 +121,6 @@
         try {
             const res = await fetch(`${API_URL}/clientes`, {
                 method: 'POST',
-                // AQUI ESTÁ A CORREÇÃO: Adicionamos o Content-Type junto com o do Ngrok
                 headers: new Headers({
                     "ngrok-skip-browser-warning": "true",
                     "Content-Type": "application/json" 
@@ -134,7 +132,6 @@
                 alert("Cadastro realizado! Faça login para continuar.");
                 mudarAba('login');
             } else {
-                // É bom mostrar o erro que o servidor devolveu, se houver
                 console.error("Erro no cadastro:", res.status);
                 alert("Erro ao cadastrar. Verifique se o e-mail já existe.");
             }
@@ -147,4 +144,5 @@
 </body>
 
 </html>
+
 
